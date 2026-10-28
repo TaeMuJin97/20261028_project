@@ -20,9 +20,16 @@ choices = {"original": ["input_chars"], "with_log": ["input_chars", "log_input_c
 rows = []
 for name, columns in choices.items():
     model = DecisionTreeClassifier(max_depth=3, random_state=42)
-    # TODO B06: 같은 folds로 model을 교차검증하세요. train만 넣고 scoring은 f1입니다.
-    scores = np.zeros(3)
-    # TODO 끝
+    # 해설 B06: 같은 folds로 model을 교차검증하세요. train만 넣고 scoring은 f1입니다.
+    scores = cross_val_score(
+        model,              # 1. 대상 모델: 평가하고자 하는 머신러닝 모델 객체 (예: LogisticRegression(), XGBClassifier() 등)
+        train[columns],     # 2. 독립 변수 (X): 모델 학습에 사용할 피처(특성) 데이터셋 (정답을 제외한 입력 데이터)
+        train["failed"],    # 3. 종속 변수 (y): 모델이 예측해야 하는 정답(Target) 레이블 데이터 (여기서는 고장 여부인 "failed")
+        cv=folds,           # 4. 교차 검증 분할기: 데이터를 몇 개로 쪼갤지 결정하는 K-Fold 객체 또는 분할 수 (예: KFold(n_splits=5))
+        scoring="f1"        # 5. 평가 평가지표: 모델의 성능을 측정할 기준 (여기서는 불균형 데이터 평가에 주로 쓰이는 "F1-score")
+    )
+
+    # 해설 끝
     rows.append({"features": name, "CV_F1": scores.mean(), "CV_std": scores.std()})
 comparison = pd.DataFrame(rows)
 # 제공: CV 평균 F1 최대를 선택합니다. 정확히 같으면 먼저 적은 original을 고릅니다.
