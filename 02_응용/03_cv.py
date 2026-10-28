@@ -31,9 +31,12 @@ from sklearn.model_selection import StratifiedKFold, cross_validate
 from sklearn.metrics import make_scorer, f1_score
 model = Pipeline([("pre", pre), ("model", LogisticRegression(C=1, max_iter=1000))])
 folds = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-# TODO A03: train만 넣어 F1과 AUC를 함께 구하세요. 전처리한 배열 대신 model 전체를 전달합니다.
-scores = {"test_f1": np.zeros(5), "test_auc": np.zeros(5)}
-# TODO 끝
+# TODO A03
+# 해설 A03: train만 넣어 F1과 AUC를 함께 구하세요. 전처리한 배열 대신 model 전체를 전달합니다.
+scores = cross_validate(model, X_train, y_train, cv=folds,
+                        scoring={"f1": make_scorer(f1_score, zero_division=0), "auc": "roc_auc"},
+                        n_jobs=1)
+# 해설 끝
 result = pd.DataFrame({"fold": range(1, 6), "F1": scores["test_f1"], "ROC_AUC": scores["test_auc"]})
 result.to_csv(OUT / "classification_cv.csv", index=False, encoding="utf-8-sig")
 print(result.round(3).to_string(index=False))
